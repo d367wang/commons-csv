@@ -139,10 +139,10 @@ final class Lexer implements Closeable {
         while (token.type == INVALID) {
             // ignore whitespaces at beginning of a token
             if (ignoreSurroundingSpaces) {
-                while (isWhitespace(c) && !eol) {
-                    c = reader.read();
-                    eol = readEndOfLine(c);
-                }
+//                while (isWhitespace(c) && !eol) {
+//                    c = reader.read();
+//                    eol = readEndOfLine(c);
+//                }
             }
 
             // ok, start of token reached: encapsulated, or token
@@ -191,30 +191,30 @@ final class Lexer implements Closeable {
      */
     private Token parseSimpleToken(final Token token, int ch) throws IOException {
         // Faster to use while(true)+break than while(token.type == INVALID)
-        while (true) {
-            if (readEndOfLine(ch)) {
-                token.type = EORECORD;
-                break;
-            } else if (isEndOfFile(ch)) {
-                token.type = EOF;
-                token.isReady = true; // There is data at EOF
-                break;
-            } else if (isDelimiter(ch)) {
-                token.type = TOKEN;
-                break;
-            } else if (isEscape(ch)) {
-                final int unescaped = readEscape();
-                if (unescaped == END_OF_STREAM) { // unexpected char after escape
-                    token.content.append((char) ch).append((char) reader.getLastChar());
-                } else {
-                    token.content.append((char) unescaped);
-                }
-                ch = reader.read(); // continue
-            } else {
-                token.content.append((char) ch);
-                ch = reader.read(); // continue
-            }
-        }
+//        while (true) {
+//            if (readEndOfLine(ch)) {
+//                token.type = EORECORD;
+//                break;
+//            } else if (isEndOfFile(ch)) {
+//                token.type = EOF;
+//                token.isReady = true; // There is data at EOF
+//                break;
+//            } else if (isDelimiter(ch)) {
+//                token.type = TOKEN;
+//                break;
+//            } else if (isEscape(ch)) {
+//                final int unescaped = readEscape();
+//                if (unescaped == END_OF_STREAM) { // unexpected char after escape
+//                    token.content.append((char) ch)/*.append((char) reader.getLastChar())*/;
+//                } else {
+//                    token.content.append((char) unescaped);
+//                }
+//                ch = reader.read(); // continue
+//            } else {
+//                token.content.append((char) ch);
+//                ch = reader.read(); // continue
+//            }
+//        }
 
         if (ignoreSurroundingSpaces) {
             trimTrailingSpaces(token.content);
@@ -250,10 +250,10 @@ final class Lexer implements Closeable {
         while (true) {
             c = reader.read();
 
-            if (isEscape(c)) {
+            if (c == escape) {
                 final int unescaped = readEscape();
                 if (unescaped == END_OF_STREAM) { // unexpected char after escape
-                    token.content.append((char) c).append((char) reader.getLastChar());
+                    token.content.append((char) c)/*.append((char) reader.getLastChar())*/;
                 } else {
                     token.content.append((char) unescaped);
                 }
@@ -261,7 +261,7 @@ final class Lexer implements Closeable {
                 if (isQuoteChar(reader.lookAhead())) {
                     // double or escaped encapsulator -> add single encapsulator to token
                     c = reader.read();
-                    token.content.append((char) c);
+//                    token.content.append((char) c);
                 } else {
                     // token finish mark (encapsulator) reached: ignore whitespace till delimiter
                     while (true) {
@@ -276,11 +276,11 @@ final class Lexer implements Closeable {
                         } else if (readEndOfLine(c)) {
                             token.type = EORECORD;
                             return token;
-                        } else if (!isWhitespace(c)) {
-                            // error invalid char between token and next delimiter
-                            throw new IOException("(line " + getCurrentLineNumber() +
-                                    ") invalid char between encapsulated token and delimiter");
-                        }
+                        } //else if (!isWhitespace(c)) {
+//                            // error invalid char between token and next delimiter
+//                            throw new IOException("(line " + getCurrentLineNumber() +
+//                                    ") invalid char between encapsulated token and delimiter");
+//                        }
                     }
                 }
             } else if (isEndOfFile(c)) {
@@ -289,7 +289,7 @@ final class Lexer implements Closeable {
                         ") EOF reached before encapsulated token finished");
             } else {
                 // consume character
-                token.content.append((char) c);
+//                token.content.append((char) c);
             }
         }
     }
